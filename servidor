@@ -70,15 +70,21 @@ def dados_recebidos(conexao, dados):
                 if antigo is not None:
                     # Troca de apelido: remove antigo
                     del apelidos[antigo.lower()]
-                    # Notifica todos em canais em comum
+                    # Notifica todos em canais em comum, exceto o próprio usuário se não estiver em canal
                     enviados = set()
                     for membros in canais.values():
                         if conexao in membros:
                             for membro in membros:
-                                if membro not in enviados:
+                                if membro not in enviados and membro is not conexao:
                                     msg = f':{antigo} NICK {apelido_str}\r\n'.encode('utf-8')
                                     membro.enviar(msg)
                                     enviados.add(membro)
+                    # O próprio usuário só recebe se estiver em canal
+                    for membros in canais.values():
+                        if conexao in membros:
+                            msg = f':{antigo} NICK {apelido_str}\r\n'.encode('utf-8')
+                            conexao.enviar(msg)
+                            break
                 conexao.apelido = apelido_str
                 apelidos[apelido_lower] = conexao
                 if antigo is None:
@@ -168,14 +174,16 @@ def dados_recebidos(conexao, dados):
                 if not membros:
                     del canais[canal_lower]
             continue
+    # Re-registra o recebedor para continuar recebendo dados
+    conexao.registrar_recebedor(dados_recebidos)
 
 
 def conexao_aceita(conexao):
     print(conexao, 'nova conexão')
+    conexao.buffer = b''
     conexao.registrar_recebedor(dados_recebidos)
 
 
 servidor = Servidor(6667)
 servidor.registrar_monitor_de_conexoes_aceitas(conexao_aceita)
 asyncio.get_event_loop().run_forever()
-
