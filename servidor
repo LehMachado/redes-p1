@@ -8,7 +8,7 @@ Conexao.dados_residuais = b''
 
 # vetores ou dicionarios (map) para armazenar os nomes
 ## transformar nomes para maiusculo para comparação
-nicks = {}
+apelidos = {}
 canais = {}
 
 
