@@ -3,8 +3,8 @@ import asyncio
 from tcp import Servidor
 import re
 
-apelidos = {}  # mapeia apelido.lower() para conexao
-canais = {}    # mapeia canal.lower() para set de conexoes
+apelidos = {}
+canais = {}
 
 
 def validar_nome(nome):
@@ -15,7 +15,6 @@ def sair(conexao):
     print(conexao, 'conexão fechada')
     apelido = getattr(conexao, 'apelido', None)
     if apelido:
-        # Envia QUIT para todos que compartilham canal
         enviados = set()
         canais_a_remover = []
         for canal, membros in canais.items():
@@ -38,7 +37,6 @@ def sair(conexao):
 def dados_recebidos(conexao, dados):
     if dados == b'':
         return sair(conexao)
-    # Inicializa buffer residual se não existir
     if not hasattr(conexao, 'buffer'):
         conexao.buffer = b''
     conexao.buffer += dados
